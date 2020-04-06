@@ -722,7 +722,7 @@ BEGIN
     orderID,
     sum(purchaseQuantity*price),
     GROUP_CONCAT(orderdetail.foodName),
-    sum(purchaseQuantity),
+    sum(purchaseQuantity)
 
     FROM (orderdetail NATURAL JOIN orders) INNER JOIN menuitem ON
     orderdetail.foodTruckName = menuitem.foodTruckName
