@@ -1,4 +1,3 @@
-HELLO YAY!
 DROP DATABASE IF EXISTS ta4400spring2020;
 CREATE DATABASE ta4400spring2020;
 USE ta4400spring2020;
@@ -543,7 +542,7 @@ CREATE PROCEDURE mn_view_foodTruck_menu(IN i_managerUsername VARCHAR(50), i_food
 BEGIN
 	DROP TABLE IF EXISTS mn_view_foodTruck_menu_result;
     CREATE TABLE mn_view_foodTruck_menu_result(foodTruckName varchar(100), stationName varchar(100),
-		foodName varchar(100), price decimal);
+		foodName varchar(100), price decimal(6,2));
 
     -- place your code/solution here
     INSERT INTO mn_view_foodTruck_menu_result
@@ -713,14 +712,24 @@ DELIMITER //
 CREATE PROCEDURE cus_order_history(IN i_customerUsername VARCHAR(55))
 BEGIN
 	DROP TABLE IF EXISTS cus_order_history_result;
-    CREATE TABLE cus_order_history_result(`date` date, orderID char(10), orderTotal decimal,
+    CREATE TABLE cus_order_history_result(`date` date, orderID char(10), orderTotal decimal(6,2),
 		foodNames varchar(100), foodQuantity int);
 
     -- place your code/solution here
+    INSERT INTO cus_order_history
 
+    SELECT date,
+    orderID,
+    sum(purchaseQuantity*price),
+    GROUP_CONCAT(orderdetail.foodName),
+    sum(purchaseQuantity),
 
-
-
-
+    FROM (orderdetail NATURAL JOIN orders) INNER JOIN menuitem ON
+    orderdetail.foodTruckName = menuitem.foodTruckName
+    AND
+    orderdetail.foodName = menuitem.foodName
+    WHERE customerUsername = i_customerUsername
+    GROUP BY orderID
+    ;
 END //
 DELIMITER ;
