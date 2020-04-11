@@ -532,19 +532,16 @@ DELIMITER //
 CREATE PROCEDURE mn_create_foodTruck_add_staff(IN i_foodTruckName VARCHAR(50), IN i_staffName VARCHAR(50))
 BEGIN
 
-    IF i_foodName NOT IN (
-        SELECT foodName
-        FROM MenuItem
-        WHERE foodTruckName = i_foodTruckName
-    ) AND
-    i_foodName IN (
-        SELECT *
-        FROM Food
-    )
-        THEN
-        INSERT INTO MenuItem(price, foodTruckName, foodName)
-        VALUES (i_price,i_foodTruckName,i_foodName)
+    IF i_staffName in (
+        SELECT username
+        FROM Staff
+        WHERE foodTruckName IS NULL
+        ) THEN
+        UPDATE Staff
+        SET foodTruckName = i_foodTruckName
+        WHERE Staff.username = i_staffName
     END IF;
+
 
 -- Query #19c: mn_create_foodTruck_add_menu_item [Screen #12 Manager Create Food Truck]
 DROP PROCEDURE IF EXISTS mn_create_foodTruck_add_menu_item;
@@ -586,7 +583,7 @@ BEGIN
      ON STAFF.username = USER.username
      WHERE
      (i_managerUsername = managerUsername) AND
-     (i_foodTruckName = foodTruckName);
+     (NULL = foodTruckName);
 
 END //
 DELIMITER ;
