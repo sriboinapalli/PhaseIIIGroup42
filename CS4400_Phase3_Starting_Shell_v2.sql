@@ -573,18 +573,10 @@ DELIMITER //
 CREATE PROCEDURE mn_view_foodTruck_available_staff(IN i_managerUsername VARCHAR(50), IN i_foodTruckName VARCHAR(50))
 BEGIN
 
-	DROP TABLE IF EXISTS mn_view_foodTruck_available_staff_result;
-     CREATE TABLE mn_view_foodTruck_available_staff_result(availableStaff varchar(100))
-     SELECT CONCAT(firstName , ' ' , lastName)
-     FROM FoodTruck
-     INNER JOIN STAFF
-     ON FoodTruck.foodTruckName = STAFF.foodTruckName
-     INNER JOIN USER
-     ON STAFF.username = USER.username
-     WHERE
-     (i_managerUsername = managerUsername) AND
-     (NULL = foodTruckName);
-
+    SELECT CONCAT(firstName , ' ' , lastName)
+    FROM STAFF INNER JOIN USER
+    ON STAFF.username = USER.username
+    WHERE foodTruckName = NULL;
 END //
 DELIMITER ;
 
