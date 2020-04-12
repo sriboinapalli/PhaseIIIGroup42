@@ -533,17 +533,14 @@ CREATE PROCEDURE mn_create_foodTruck_add_staff(IN i_foodTruckName VARCHAR(50), I
 BEGIN
 
     IF i_staffName in (
-        SELECT CONCAT(firstName , ' ' , lastName)
-        FROM Staff INNER JOIN Users ON Staff.username = Users.username
+        SELECT username
+        FROM Staff 
         WHERE foodTruckName IS NULL
         ) THEN
         UPDATE Staff
         SET foodTruckName = i_foodTruckName
-        WHERE Staff.username = (
-            SELECT staff.username
-            FROM Staff INNER JOIN Users ON Staff.username = Users.username
-            WHERE i_staffName =  CONCAT(firstName , ' ' , lastName)
-        );
+        WHERE Staff.username = i_staffName
+        ;
     END IF;
 
 END //
