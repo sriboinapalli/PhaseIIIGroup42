@@ -533,16 +533,20 @@ CREATE PROCEDURE mn_create_foodTruck_add_staff(IN i_foodTruckName VARCHAR(50), I
 BEGIN
 
     IF i_staffName in (
-        SELECT username
-        FROM Staff
+        SELECT CONCAT(firstName , ' ' , lastName)
+        FROM Staff INNER JOIN Users ON Staff.username = Users.username
         WHERE foodTruckName IS NULL
         ) THEN
         UPDATE Staff
         SET foodTruckName = i_foodTruckName
-        WHERE Staff.username = i_staffName
+        WHERE Staff.username = (
+            SELECT staff.username
+            FROM Staff INNER JOIN Users ON Staff.username = Users.username
+            WHERE i_staffName =  CONCAT(firstName , ' ' , lastName)
+        )
     END IF;
 
-
+END //
 -- Query #19c: mn_create_foodTruck_add_menu_item [Screen #12 Manager Create Food Truck]
 DROP PROCEDURE IF EXISTS mn_create_foodTruck_add_menu_item;
 DELIMITER //
@@ -613,7 +617,7 @@ BEGIN
     INSERT INTO mn_view_foodTruck_menu_result
     SELECT foodTruck.foodTruckName, stationName, foodName, price
     FROM MenuItem join FoodTruck on MenuItem.foodTruckName = FoodTruck.foodTruckName
-    WHERE foodTruck.foodTruckName = i_foodTruckName,foodTruck.managerUsername = i_managerUsername
+    WHERE foodTruck.foodTruckName = i_foodTruckName AND foodTruck.managerUsername = i_managerUsername
     ;
 
 END //
