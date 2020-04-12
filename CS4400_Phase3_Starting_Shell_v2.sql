@@ -543,7 +543,7 @@ BEGIN
             SELECT staff.username
             FROM Staff INNER JOIN Users ON Staff.username = Users.username
             WHERE i_staffName =  CONCAT(firstName , ' ' , lastName)
-        )
+        );
     END IF;
 
 END //
@@ -564,7 +564,7 @@ BEGIN
     )
         THEN
         INSERT INTO MenuItem(price, foodTruckName, foodName)
-        VALUES (i_price,i_foodTruckName,i_foodName)
+        VALUES (i_price,i_foodTruckName,i_foodName);
     END IF;
 END //
 DELIMITER ;
