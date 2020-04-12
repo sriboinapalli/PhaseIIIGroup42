@@ -617,7 +617,7 @@ BEGIN
     INSERT INTO mn_view_foodTruck_menu_result
     SELECT foodTruck.foodTruckName, stationName, foodName, price
     FROM MenuItem join FoodTruck on MenuItem.foodTruckName = FoodTruck.foodTruckName
-    WHERE foodTruck.foodTruckName = i_foodTruckName AND foodTruck.managerUsername = i_managerUsername
+    WHERE foodTruck.foodTruckName = i_foodTruckName
     ;
 
 END //
