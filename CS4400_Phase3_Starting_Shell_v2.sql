@@ -846,7 +846,34 @@ CREATE PROCEDURE cus_add_item_to_order(IN i_foodTruckName VARCHAR(55), IN i_food
 BEGIN
 
     -- place your code/solution here
+    IF (i_purchaseQuantity * (
+        SELECT price
+        FROM MenuItem
+        WHERE foodTruckName = i_foodTruckName AND
+        foodName = i_foodName) < (
+        SELECT balance
+        FROM customer INNER JOIN orders ON customer.username = orders.customerusername
+        WHERE orderID = i_orderID
+        )) THEN
+		INSERT INTO OrderDetail(orderID, foodTruckName, foodName, purchaseQuantity)
+		VALUES (i_orderID, i_foodTruckName, i_foodName, i_purchaseQuantity);
 
+		UPDATE Customer
+		SET balance = balance - (i_purchaseQuantity * (
+			SELECT price
+			FROM MenuItem
+			WHERE foodTruckName = i_foodTruckName AND
+			foodName = i_foodName))
+		WHERE customer.username = (
+			SELECT username
+			FROM  orders
+			WHERE orderID = i_orderID
+        );
+    END IF;
+
+								      
+								      
+								      
 END //
 DELIMITER ;
 
