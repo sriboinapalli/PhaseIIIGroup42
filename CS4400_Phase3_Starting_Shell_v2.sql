@@ -211,11 +211,47 @@ CREATE PROCEDURE register(
                 IN i_balance DECIMAL(6,2),
                 IN i_type ENUM('Admin', 'Manager', 'Staff'))
 BEGIN
+	IF length(i_password) >= 8
+    THEN
+	INSERT INTO cs4400spring2020.`User`  VALUES (i_username, i_password,i_firstname, i_lastname);
+    END IF;
+    
+    IF i_email IS NOT NULL
+    AND length(i_password) >= 8
+    THEN
+    INSERT INTO Employee VALUES (i_username, i_email);
+    END IF;
+    
+    IF i_balance > 0
+    AND length(i_password) >= 8
+    THEN
+    INSERT INTO Customer VALUES (i_username, i_balance, NULL);
+    END IF;
+    
+    IF i_type = 'Admin'
+    AND i_email IS NOT NULL
+    AND length(i_password) >= 8
+    THEN
+    INSERT INTO Admin VALUES (i_username);
+    END IF;
 
-    -- place your code/solution here
-
+	IF i_type = 'Manager'
+    AND i_email IS NOT NULL
+    AND length(i_password) >= 8
+    THEN
+    INSERT INTO Manager VALUES (i_username);
+    END IF;
+    
+    IF i_type = 'Staff'
+    AND i_email IS NOT NULL
+    AND length(i_password) >= 8
+    THEN
+    INSERT INTO Staff VALUES (i_username, NULL);
+    END IF;
+    
+    
 END //
-DELIMITER ;
+DELIMITER ; 
 
 -- Query #3: ad_filter_building_station [Screen #4 Admin Manage Building & Station]
 DROP PROCEDURE IF EXISTS ad_filter_building_station;
@@ -466,32 +502,37 @@ DROP PROCEDURE IF EXISTS mn_filter_foodTruck;
 DELIMITER //
 CREATE PROCEDURE mn_filter_foodTruck(
     IN i_managerUsername VARCHAR(50),
-    IN i_foodTruckName VARCHAR(50),
-    IN i_stationName VARCHAR(50),
-    IN i_minStaffCount INT,
-    IN i_maxStaffCount INT,
+    IN i_foodTruckName VARCHAR(50), 
+    IN i_stationName VARCHAR(50), 
+    IN i_minStaffCount INT, 
+    
+    IN i_maxStaffCount INT, 
     IN i_hasRemainingCapacity BOOLEAN)
 BEGIN
 
 	DROP TABLE IF EXISTS mn_filter_foodTruck_result;
      CREATE TABLE mn_filter_foodTruck_result(foodTruckName varchar(100), stationName varchar(100),
-		remainingCapacity int, staffCount int, menuItemCount int)
-SELECT foodTruckName, stationName, capacity, COUNT(DISTINCT username), COUNT(DISTINCT foodName)
-    FROM FoodTruck
-    INNER JOIN STATION
-    ON FoodTruck.stationName = STATION.stationName
+		remainingCapacity int, staffCount int, menuItemCount int);
+INSERT INTO mn_filter_foodTruck_result 
+SELECT FoodTruck.foodTruckName, FoodTruck.stationName, capacity, COUNT(DISTINCT username), COUNT(DISTINCT foodName)
+    FROM FOODTRUCK 
+    INNER JOIN STATION 
+    ON FOODTRUCK.stationName = STATION.stationName
     INNER JOIN STAFF
-    ON FoodTruck.foodTruckName = STAFF.foodTruckName
-    INNER JOIN MENU_ITEM
-    ON FoodTruck.foodTruckName = MENU_ITEM.foodTruckName
+    ON FOODTRUCK.foodTruckName = STAFF.foodTruckName
+    INNER JOIN MENUITEM
+    ON FOODTRUCK.foodTruckName = MENUITEM.foodTruckName
     WHERE
     (i_managerUsername = managerUsername) AND
-    (i_foodTruckName = foodTruckName OR i_foodTruckName = "") AND
-    (i_stationName = stationName OR i_stationName = "") AND
+    (i_foodTruckName = FoodTruck.foodTruckName OR i_foodTruckName = "") AND
+    (i_stationName = FoodTruck.stationName OR i_stationName = "") AND
     ((i_hasRemainingCapacity = TRUE AND capacity>0) OR (i_hasRemainingCapacity = FALSE))
-    GROUP BY foodTruckName
-    HAVING
-    ((i_minStaffCount IS NULL AND i_maxStaffCount IS NULL) OR (i_minStaffCount IS NULL AND staffCount <= i_maxStaffCount) OR (i_maxStaffCount IS NULL AND i_minStaffCount <= staffCount) OR (staffCount BETWEEN i_minStaffCount AND i_maxStaffCount));
+    GROUP BY FoodTruck.foodTruckName
+    HAVING 
+    ((i_minStaffCount IS NULL AND i_maxStaffCount IS NULL) OR
+    (i_minStaffCount IS NULL AND COUNT(DISTINCT username) <= i_maxStaffCount) OR
+    (i_maxStaffCount IS NULL AND i_minStaffCount <= COUNT(DISTINCT username)) OR
+    (COUNT(DISTINCT username) BETWEEN i_minStaffCount AND i_maxStaffCount));
 
 END //
 DELIMITER ;
@@ -501,10 +542,8 @@ DROP PROCEDURE IF EXISTS mn_delete_foodTruck;
 DELIMITER //
 CREATE PROCEDURE mn_delete_foodTruck(IN i_foodTruckName VARCHAR(50))
 BEGIN
-
-    DELETE FROM FoodTruck
+	DELETE FROM FOODTRUCK
     WHERE i_foodTruckName = foodTruckName;
-
 END //
 DELIMITER ;
 
