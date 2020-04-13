@@ -728,7 +728,7 @@ CREATE PROCEDURE mn_filter_summary(
     IN i_sortedDirection ENUM('ASC', 'DESC'))
 BEGIN
     DROP TABLE IF EXISTS mn_filter_summary_result;
-    CREATE TABLE mn_filter_summary_result(foodTruckName varchar(100), totalOrder int, totalRevenue decimal, totalCustomer int);
+    CREATE TABLE mn_filter_summary_result(foodTruckName varchar(100), totalOrder int, totalRevenue DECIMAL(6,2), totalCustomer int);
 
     INSERT INTO mn_filter_summary_result
     SELECT foodTruckName, totalOrder, totalRevenue, totalCustomer
