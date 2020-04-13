@@ -215,19 +215,19 @@ BEGIN
     THEN
 	INSERT INTO cs4400spring2020.`User`  VALUES (i_username, i_password,i_firstname, i_lastname);
     END IF;
-    
+
     IF i_email IS NOT NULL
     AND length(i_password) >= 8
     THEN
     INSERT INTO Employee VALUES (i_username, i_email);
     END IF;
-    
+
     IF i_balance > 0
     AND length(i_password) >= 8
     THEN
     INSERT INTO Customer VALUES (i_username, i_balance, NULL);
     END IF;
-    
+
     IF i_type = 'Admin'
     AND i_email IS NOT NULL
     AND length(i_password) >= 8
@@ -241,17 +241,17 @@ BEGIN
     THEN
     INSERT INTO Manager VALUES (i_username);
     END IF;
-    
+
     IF i_type = 'Staff'
     AND i_email IS NOT NULL
     AND length(i_password) >= 8
     THEN
     INSERT INTO Staff VALUES (i_username, NULL);
     END IF;
-    
-    
+
+
 END //
-DELIMITER ; 
+DELIMITER ;
 
 -- Query #3: ad_filter_building_station [Screen #4 Admin Manage Building & Station]
 DROP PROCEDURE IF EXISTS ad_filter_building_station;
@@ -460,14 +460,14 @@ BEGIN
 	INSERT INTO ad_filter_food_result
     SELECT foodName, count(foodName) as menuCount, sum(purchaseQuantity) as purchaseCount
     FROM orderdetail
-    WHERE i_foodName = NULL OR foodName = i_foodName
+    WHERE i_foodName IS NULL OR foodName = i_foodName
     GROUP BY foodName
     ORDER BY
-        CASE WHEN (i_sortedBy = "name" AND (i_sortDirection = "ASC" OR i_sortDirection = NULL)) THEN foodName END ASC,
+        CASE WHEN (i_sortedBy = "name" AND (i_sortDirection = "ASC" OR i_sortDirection IS NULL)) THEN foodName END ASC,
         CASE WHEN i_sortedBy = "name" AND i_sortDirection = "DESC" THEN foodName END DESC,
-		CASE WHEN i_sortedBy = "menuCount" AND (i_sortDirection = "ASC" OR i_sortDirection = NULL) THEN menuCount END ASC,
+		CASE WHEN i_sortedBy = "menuCount" AND (i_sortDirection = "ASC" OR i_sortDirection IS NULL) THEN menuCount END ASC,
 		CASE WHEN i_sortedBy = "menuCount" AND i_sortDirection = "DESC" THEN menuCount END DESC,
-		CASE WHEN i_sortedBy = "purchaseCount" AND (i_sortDirection = "ASC" OR i_sortDirection = NULL) THEN purchaseCount END ASC,
+		CASE WHEN i_sortedBy = "purchaseCount" AND (i_sortDirection = "ASC" OR i_sortDirection IS NULL) THEN purchaseCount END ASC,
 		CASE WHEN i_sortedBy = "purchaseCount" AND i_sortDirection = "DESC" THEN purchaseCount END DESC;
 
 END //
@@ -502,21 +502,21 @@ DROP PROCEDURE IF EXISTS mn_filter_foodTruck;
 DELIMITER //
 CREATE PROCEDURE mn_filter_foodTruck(
     IN i_managerUsername VARCHAR(50),
-    IN i_foodTruckName VARCHAR(50), 
-    IN i_stationName VARCHAR(50), 
-    IN i_minStaffCount INT, 
-    
-    IN i_maxStaffCount INT, 
+    IN i_foodTruckName VARCHAR(50),
+    IN i_stationName VARCHAR(50),
+    IN i_minStaffCount INT,
+
+    IN i_maxStaffCount INT,
     IN i_hasRemainingCapacity BOOLEAN)
 BEGIN
 
 	DROP TABLE IF EXISTS mn_filter_foodTruck_result;
      CREATE TABLE mn_filter_foodTruck_result(foodTruckName varchar(100), stationName varchar(100),
 		remainingCapacity int, staffCount int, menuItemCount int);
-INSERT INTO mn_filter_foodTruck_result 
+INSERT INTO mn_filter_foodTruck_result
 SELECT FoodTruck.foodTruckName, FoodTruck.stationName, capacity, COUNT(DISTINCT username), COUNT(DISTINCT foodName)
-    FROM FOODTRUCK 
-    INNER JOIN STATION 
+    FROM FOODTRUCK
+    INNER JOIN STATION
     ON FOODTRUCK.stationName = STATION.stationName
     INNER JOIN STAFF
     ON FOODTRUCK.foodTruckName = STAFF.foodTruckName
@@ -528,7 +528,7 @@ SELECT FoodTruck.foodTruckName, FoodTruck.stationName, capacity, COUNT(DISTINCT 
     (i_stationName = FoodTruck.stationName OR i_stationName = "") AND
     ((i_hasRemainingCapacity = TRUE AND capacity>0) OR (i_hasRemainingCapacity = FALSE))
     GROUP BY FoodTruck.foodTruckName
-    HAVING 
+    HAVING
     ((i_minStaffCount IS NULL AND i_maxStaffCount IS NULL) OR
     (i_minStaffCount IS NULL AND COUNT(DISTINCT username) <= i_maxStaffCount) OR
     (i_maxStaffCount IS NULL AND i_minStaffCount <= COUNT(DISTINCT username)) OR
@@ -573,7 +573,7 @@ BEGIN
 
     IF i_staffName in (
         SELECT username
-        FROM Staff 
+        FROM Staff
         WHERE foodTruckName IS NULL
         ) THEN
         UPDATE Staff
@@ -616,7 +616,7 @@ BEGIN
     SELECT CONCAT(firstName , ' ' , lastName)
     FROM STAFF INNER JOIN USER
     ON STAFF.username = USER.username
-    WHERE foodTruckName = NULL;
+    WHERE foodTruckName IS NULL;
 END //
 DELIMITER ;
 
@@ -749,15 +749,15 @@ BEGIN
         GROUP BY FoodTruck.foodTruckName
     ) T
     ORDER BY
-        CASE WHEN (i_sortedBy = NULL AND (i_sortedDirection = "ASC" OR i_sortedDirection = NULL)) THEN foodTruckName END ASC,
-        CASE WHEN (i_sortedBy = NULL AND i_sortedDirection = "DESC") THEN foodTruckName END DESC,
-        CASE WHEN i_sortedBy = "foodTruckName" AND (i_sortedDirection = "ASC" OR i_sortedDirection = NULL) THEN foodTruckName END ASC,
+        CASE WHEN (i_sortedBy IS NULL AND (i_sortedDirection = "ASC" OR i_sortedDirection IS NULL)) THEN foodTruckName END ASC,
+        CASE WHEN (i_sortedBy IS NULL AND i_sortedDirection = "DESC") THEN foodTruckName END DESC,
+        CASE WHEN i_sortedBy = "foodTruckName" AND (i_sortedDirection = "ASC" OR i_sortedDirection IS NULL) THEN foodTruckName END ASC,
         CASE WHEN i_sortedBy = "foodTruckName" AND i_sortedDirection = "DESC" THEN foodTruckName END DESC,
-        CASE WHEN i_sortedBy = "totalOrder" AND (i_sortedDirection = "ASC" OR i_sortedDirection = NULL) THEN totalOrder END ASC,
+        CASE WHEN i_sortedBy = "totalOrder" AND (i_sortedDirection = "ASC" OR i_sortedDirection IS NULL) THEN totalOrder END ASC,
         CASE WHEN i_sortedBy = "totalOrder" AND i_sortedDirection = "DESC" THEN totalOrder END DESC,
-        CASE WHEN i_sortedBy = "totalRevenue" AND (i_sortedDirection = "ASC" OR i_sortedDirection = NULL) THEN totalRevenue END ASC,
+        CASE WHEN i_sortedBy = "totalRevenue" AND (i_sortedDirection = "ASC" OR i_sortedDirection IS NULL) THEN totalRevenue END ASC,
         CASE WHEN i_sortedBy = "totalRevenue" AND i_sortedDirection = "DESC" THEN totalRevenue END DESC,
-        CASE WHEN i_sortedBy = "totalCustomer" AND (i_sortedDirection = "ASC" OR i_sortedDirection = NULL) THEN totalCustomer END ASC,
+        CASE WHEN i_sortedBy = "totalCustomer" AND (i_sortedDirection = "ASC" OR i_sortedDirection IS NULL) THEN totalCustomer END ASC,
         CASE WHEN i_sortedBy = "totalCustomer" AND i_sortedDirection = "DESC" THEN totalCustomer END DESC
         ;
 
@@ -910,9 +910,9 @@ BEGIN
         );
     END IF;
 
-								      
-								      
-								      
+
+
+
 END //
 DELIMITER ;
 
